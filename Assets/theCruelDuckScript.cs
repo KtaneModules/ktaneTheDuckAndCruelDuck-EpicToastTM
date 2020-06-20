@@ -309,6 +309,7 @@ public class theCruelDuckScript : MonoBehaviour {
         {
             Module.HandleStrike();
             Debug.LogFormat("[The Cruel Duck #{0}] You had the right approach ({1}), but you were supposed to select an item! Strike.", _moduleId, possibleApproaches[correctApproach]);
+            Init();
         }
 
         else
