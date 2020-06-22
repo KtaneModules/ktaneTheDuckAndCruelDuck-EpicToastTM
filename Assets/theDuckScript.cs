@@ -129,12 +129,14 @@ public class theDuckScript : MonoBehaviour {
             Audio.PlaySoundAtTransform("solveSound", Module.transform);
             solved = true;
             surface.material = solvedMat;
+            Debug.LogFormat("[The Duck #{0}] Module solved.", _moduleId);
         }
 
         else
         {
             Module.HandleStrike();
             Init();
+            Debug.LogFormat("[The Duck #{0}] You pressed an incorrect part of the duck! Strike.", _moduleId);
         }
     }
 
@@ -152,6 +154,7 @@ public class theDuckScript : MonoBehaviour {
         {
             Module.HandleStrike();
             Init();
+            Debug.LogFormat("[The Duck #{0}] You approached incorrectly! Strike.", _moduleId);
         }
 
         for (int i = 0; i < 4; i++)
