@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 public class theDuckScript : MonoBehaviour {
 
@@ -101,19 +102,27 @@ public class theDuckScript : MonoBehaviour {
 
         shownApproaches = new int[4]{ literallyABunchOfNumbers[0], literallyABunchOfNumbers[1], literallyABunchOfNumbers[2], literallyABunchOfNumbers[3] };
 
-        Debug.LogFormat("[The Duck #{0}] The curtain is {1}.", _moduleId, colorNames[curtainColor]);
-        Debug.LogFormat("[The Duck #{0}] Therefore, the duck is {1}.", _moduleId, personalities[curtainColor]);
-        Debug.LogFormat("[The Duck #{0}] The possible approaches are {1}, {2}, {3}, and {4}.", _moduleId, approaches[shownApproaches[0]].Replace('\n', ' '), approaches[shownApproaches[1]].Replace('\n', ' '), approaches[shownApproaches[2]].Replace('\n', ' '), approaches[shownApproaches[3]].Replace('\n', ' '));
-
-        for (int i = 0; i < 3; i++)
+        correctApproach = -1;
+        while (correctApproach == -1)
         {
-            if (shownApproaches.Contains(lumpOfApproaches[i + 3 * curtainColor]))
+            for (int i = 0; i < 3; i++)
             {
-                correctApproach = lumpOfApproaches[i + 3 * curtainColor];
-                break;
+                if (shownApproaches.Contains(lumpOfApproaches[i + 3 * curtainColor]))
+                {
+                    correctApproach = lumpOfApproaches[i + 3 * curtainColor];
+                    break;
+                }
+            }
+            if (correctApproach == -1)
+            {
+                literallyABunchOfNumbers = Enumerable.Range(0, 7).ToList().Shuffle().ToArray();
+                shownApproaches = new int[4] { literallyABunchOfNumbers[0], literallyABunchOfNumbers[1], literallyABunchOfNumbers[2], literallyABunchOfNumbers[3] };
             }
         }
 
+        Debug.LogFormat("[The Duck #{0}] The curtain is {1}.", _moduleId, colorNames[curtainColor]);
+        Debug.LogFormat("[The Duck #{0}] Therefore, the duck is {1}.", _moduleId, personalities[curtainColor]);
+        Debug.LogFormat("[The Duck #{0}] The possible approaches are {1}, {2}, {3}, and {4}.", _moduleId, approaches[shownApproaches[0]].Replace('\n', ' '), approaches[shownApproaches[1]].Replace('\n', ' '), approaches[shownApproaches[2]].Replace('\n', ' '), approaches[shownApproaches[3]].Replace('\n', ' '));
         Debug.LogFormat("[The Duck #{0}] The correct approach is to {1}.", _moduleId, approaches[correctApproach].Replace('\n', ' '));
         Debug.LogFormat("[The Duck #{0}] The correct part to click is the {1}.", _moduleId, duckPartNames[correctApproach]);
 
@@ -135,8 +144,8 @@ public class theDuckScript : MonoBehaviour {
         else
         {
             Module.HandleStrike();
-            Init();
             Debug.LogFormat("[The Duck #{0}] You pressed an incorrect part of the duck! Strike.", _moduleId);
+            Init();
         }
     }
 
@@ -153,8 +162,8 @@ public class theDuckScript : MonoBehaviour {
         else
         {
             Module.HandleStrike();
-            Init();
             Debug.LogFormat("[The Duck #{0}] You approached incorrectly! Strike.", _moduleId);
+            Init();
         }
 
         for (int i = 0; i < 4; i++)
@@ -175,5 +184,127 @@ public class theDuckScript : MonoBehaviour {
             btnSelectables[i].enabled = true;
             btnText[i].text = approaches[shownApproaches[i]];
         }
+    }
+
+    //twitch plays
+    #pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"!{0} curtain [Pulls back the curtain] | !{0} TL/TR/BL/BR [Presses the approach button in the specified positon (top-left, top-right, etc.)] | !{0} belly/beak/afro/tail/eye/left/right [Clicks the specified part of the duck]";
+    #pragma warning restore 414
+    IEnumerator ProcessTwitchCommand(string command)
+    {
+        if (Regex.IsMatch(command, @"^\s*curtain\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (!curtainSelectable.enabled)
+            {
+                yield return "sendtochaterror The curtain has already been pulled back!";
+                yield break;
+            }
+            curtainSelectable.OnInteract();
+            yield break;
+        }
+        if (Regex.IsMatch(command, @"^\s*tl\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*topleft\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*top-left\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (curtainSelectable.enabled)
+            {
+                yield return "sendtochaterror The curtain must be pulled back before an approach button can be pressed!";
+                yield break;
+            }
+            else if (duckParts[0].gameObject.activeSelf)
+            {
+                yield return "sendtochaterror The duck has already been approached!";
+                yield break;
+            }
+            btnSelectables[0].OnInteract();
+            yield break;
+        }
+        if (Regex.IsMatch(command, @"^\s*bl\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*bottomleft\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*bottom-left\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (curtainSelectable.enabled)
+            {
+                yield return "sendtochaterror The curtain must be pulled back before an approach button can be pressed!";
+                yield break;
+            }
+            else if (duckParts[0].gameObject.activeSelf)
+            {
+                yield return "sendtochaterror The duck has already been approached!";
+                yield break;
+            }
+            btnSelectables[1].OnInteract();
+            yield break;
+        }
+        if (Regex.IsMatch(command, @"^\s*tr\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*topright\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*top-right\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (curtainSelectable.enabled)
+            {
+                yield return "sendtochaterror The curtain must be pulled back before an approach button can be pressed!";
+                yield break;
+            }
+            else if (duckParts[0].gameObject.activeSelf)
+            {
+                yield return "sendtochaterror The duck has already been approached!";
+                yield break;
+            }
+            btnSelectables[2].OnInteract();
+            yield break;
+        }
+        if (Regex.IsMatch(command, @"^\s*br\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*bottomright\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*bottom-right\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (curtainSelectable.enabled)
+            {
+                yield return "sendtochaterror The curtain must be pulled back before an approach button can be pressed!";
+                yield break;
+            }
+            else if (duckParts[0].gameObject.activeSelf)
+            {
+                yield return "sendtochaterror The duck has already been approached!";
+                yield break;
+            }
+            btnSelectables[3].OnInteract();
+            yield break;
+        }
+        if (Regex.IsMatch(command, @"^\s*belly\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*afro\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*beak\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*left\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*eye\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*tail\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*right\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            List<string> parts = new List<string>() { "belly", "afro", "beak", "left", "right", "eye", "tail" };
+            if (curtainSelectable.enabled)
+            {
+                yield return "sendtochaterror The curtain must be pulled back before a duck part can be clicked!";
+                yield break;
+            }
+            else if (!duckParts[0].gameObject.activeSelf)
+            {
+                yield return "sendtochaterror The duck has not been approached yet!";
+                yield break;
+            }
+            duckParts[parts.IndexOf(command.ToLower())].OnInteract();
+            yield break;
+        }
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        if (curtainSelectable.enabled)
+        {
+            curtainSelectable.OnInteract();
+            yield return new WaitForSeconds(0.1f);
+        }
+        if (!duckParts[0].gameObject.activeSelf)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                if (shownApproaches[i] == correctApproach)
+                {
+                    btnSelectables[i].OnInteract();
+                    yield return new WaitForSeconds(0.1f);
+                    break;
+                }
+            }
+        }
+        duckParts[correctApproach].OnInteract();
     }
 }
