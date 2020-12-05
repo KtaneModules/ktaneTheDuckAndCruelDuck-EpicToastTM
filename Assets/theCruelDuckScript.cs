@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using KModkit;
+using System.Text.RegularExpressions;
 
 public class theCruelDuckScript : MonoBehaviour {
 
@@ -449,6 +450,24 @@ public class theCruelDuckScript : MonoBehaviour {
             var literallyABunchOfNumbers = Enumerable.Range(0, 6).ToList().Shuffle().ToArray();
             shownApproaches = new int[4] { literallyABunchOfNumbers[0], literallyABunchOfNumbers[1], literallyABunchOfNumbers[2], literallyABunchOfNumbers[3] };
 
+            correctApproach = -1;
+            while (correctApproach == -1)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    if (shownApproaches.Contains(fuckPelicans[i + Bomb.GetSerialNumberNumbers().Last() * 3]))
+                    {
+                        correctApproach = fuckPelicans[i + Bomb.GetSerialNumberNumbers().Last() * 3];
+                        break;
+                    }
+                }
+                if (correctApproach == -1)
+                {
+                    literallyABunchOfNumbers = Enumerable.Range(0, 6).ToList().Shuffle().ToArray();
+                    shownApproaches = new int[4] { literallyABunchOfNumbers[0], literallyABunchOfNumbers[1], literallyABunchOfNumbers[2], literallyABunchOfNumbers[3] };
+                }
+            }
+
             for (int i = 0; i < 4; i++)
             {
                 btnRenderers[i].gameObject.SetActive(true);
@@ -458,16 +477,6 @@ public class theCruelDuckScript : MonoBehaviour {
 
             Debug.LogFormat("[The Cruel Duck #{0}] There is a pelican behind the curtain.", _moduleId);
             Debug.LogFormat("[The Cruel Duck #{0}] The possible ways to shoo the pelican are to {1}, {2}, {3}, and {4}.", _moduleId, waysToFuckPelicans[shownApproaches[0]].Replace('\n', ' '), waysToFuckPelicans[shownApproaches[1]].Replace('\n', ' '), waysToFuckPelicans[shownApproaches[2]].Replace('\n', ' '), waysToFuckPelicans[shownApproaches[3]].Replace('\n', ' '));
-
-            for (int i = 0; i < 3; i++)
-            {
-                if (shownApproaches.Contains(fuckPelicans[i + Bomb.GetSerialNumberNumbers().Last() * 3]))
-                {
-                    correctApproach = fuckPelicans[i + Bomb.GetSerialNumberNumbers().Last() * 3];
-                    break;
-                }
-            }
-
             Debug.LogFormat("[The Cruel Duck #{0}] You should {1}.", _moduleId, waysToFuckPelicans[correctApproach].Replace('\n', ' '));
         }
         else
@@ -483,7 +492,7 @@ public class theCruelDuckScript : MonoBehaviour {
             switch (mainCurtainColor)
             {
                 case 0:
-                    if (Bomb.GetBatteryCount() < 2)
+                    if (Bomb.GetIndicators().Count() < 2)
                     {
                         correctApproach = 0;
                         correctItemRule = 0;
@@ -590,6 +599,418 @@ public class theCruelDuckScript : MonoBehaviour {
             {
                 duckParts[i].gameObject.SetActive(false);
                 duckParts[i].enabled = false;
+            }
+        }
+    }
+
+    //twitch plays
+    #pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"!{0} curtain (#) [Pulls back the curtain (optionally when the last digit of the bomb's timer is '#')] | !{0} TL/TR/BL/BR [Presses the approach button in the specified positon (top-left, top-right, etc.) | !{0} item <pos> [Takes the item in the specified position (the same positions as approach)] | !{0} belly/beak/afro/tail/eye/left/right (##:##) [Clicks the specified part of the duck (optionally when the bomb timer is '##:##')]";
+    bool ZenModeActive;
+    #pragma warning restore 414
+    IEnumerator ProcessTwitchCommand(string command)
+    {
+        if (Regex.IsMatch(command, @"^\s*tl\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*topleft\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*top-left\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (curtainSelectable.enabled)
+            {
+                yield return "sendtochaterror The approach buttons must be present before an approach button can be pressed!";
+                yield break;
+            }
+            else if (duckParts[0].gameObject.activeSelf)
+            {
+                yield return "sendtochaterror The duck has already been approached!";
+                yield break;
+            }
+            btnSelectables[0].OnInteract();
+            yield break;
+        }
+        if (Regex.IsMatch(command, @"^\s*bl\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*bottomleft\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*bottom-left\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (curtainSelectable.enabled)
+            {
+                yield return "sendtochaterror The curtain must be pulled back before an approach button can be pressed!";
+                yield break;
+            }
+            else if (duckParts[0].gameObject.activeSelf)
+            {
+                yield return "sendtochaterror The duck has already been approached!";
+                yield break;
+            }
+            btnSelectables[1].OnInteract();
+            yield break;
+        }
+        if (Regex.IsMatch(command, @"^\s*tr\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*topright\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*top-right\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (curtainSelectable.enabled)
+            {
+                yield return "sendtochaterror The curtain must be pulled back before an approach button can be pressed!";
+                yield break;
+            }
+            else if (duckParts[0].gameObject.activeSelf)
+            {
+                yield return "sendtochaterror The duck has already been approached!";
+                yield break;
+            }
+            btnSelectables[2].OnInteract();
+            yield break;
+        }
+        if (Regex.IsMatch(command, @"^\s*br\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*bottomright\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(command, @"^\s*bottom-right\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (curtainSelectable.enabled)
+            {
+                yield return "sendtochaterror The curtain must be pulled back before an approach button can be pressed!";
+                yield break;
+            }
+            else if (duckParts[0].gameObject.activeSelf)
+            {
+                yield return "sendtochaterror The duck has already been approached!";
+                yield break;
+            }
+            btnSelectables[3].OnInteract();
+            yield break;
+        }
+        string[] parameters = command.Split(' ');
+        if (Regex.IsMatch(parameters[0], @"^\s*curtain\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (parameters.Length > 2)
+            {
+                yield return "sendtochaterror Too many parameters!";
+            }
+            else if (parameters.Length == 2)
+            {
+                if (!curtainSelectable.enabled)
+                {
+                    yield return "sendtochaterror The curtains are currently not present!";
+                    yield break;
+                }
+                int temp = 0;
+                if (!int.TryParse(parameters[1], out temp))
+                {
+                    yield return "sendtochaterror!f The specified digit '" + parameters[1] + "' is invalid!";
+                    yield break;
+                }
+                if (temp < 0 || temp > 9)
+                {
+                    yield return "sendtochaterror!f The specified digit '" + parameters[1] + "' is out of range 0-9!";
+                    yield break;
+                }
+                while ((int)Bomb.GetTime() % 10 != temp) { yield return "trycancel"; }
+                curtainSelectable.OnInteract();
+            }
+            else if (parameters.Length == 1)
+            {
+                if (!curtainSelectable.enabled)
+                {
+                    yield return "sendtochaterror The curtains are currently not present!";
+                    yield break;
+                }
+                curtainSelectable.OnInteract();
+            }
+            yield break;
+        }
+        if (Regex.IsMatch(parameters[0], @"^\s*item\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            if (parameters.Length > 2)
+            {
+                yield return "sendtochaterror Too many parameters!";
+            }
+            else if (parameters.Length == 2)
+            {
+                if (!itemSelectables[0].gameObject.activeSelf && !itemSelectables[1].gameObject.activeSelf && !itemSelectables[2].gameObject.activeSelf && !itemSelectables[3].gameObject.activeSelf)
+                {
+                    yield return "sendtochaterror The items must be present before an item button can be taken!";
+                    yield break;
+                }
+                string[] pos1 = new string[] { "tl", "topleft", "top-left" };
+                string[] pos2 = new string[] { "tr", "topright", "top-right" };
+                string[] pos3 = new string[] { "bl", "bottomleft", "bottom-left" };
+                string[] pos4 = new string[] { "br", "bottomright", "bottom-right" };
+                if (pos1.Contains(parameters[1].ToLower()))
+                    itemSelectables[0].OnInteract();
+                else if (pos2.Contains(parameters[1].ToLower()))
+                    itemSelectables[1].OnInteract();
+                else if (pos3.Contains(parameters[1].ToLower()))
+                    itemSelectables[2].OnInteract();
+                else if (pos4.Contains(parameters[1].ToLower()))
+                    itemSelectables[3].OnInteract();
+                else
+                    yield return "sendtochaterror!f The specified position '" + parameters[1] + "' is invalid!";
+            }
+            else if (parameters.Length == 1)
+            {
+                yield return "sendtochaterror Please specify the position of the item you wish to take!";
+            }
+            yield break;
+        }
+        if (Regex.IsMatch(parameters[0], @"^\s*belly\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(parameters[0], @"^\s*afro\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(parameters[0], @"^\s*beak\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(parameters[0], @"^\s*left\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(parameters[0], @"^\s*eye\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(parameters[0], @"^\s*tail\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(parameters[0], @"^\s*right\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            yield return null;
+            List<string> parts = new List<string>() { "belly", "afro", "beak", "left", "eye", "tail", "right" };
+            if (parameters.Length > 2)
+            {
+                yield return "sendtochaterror Too many parameters!";
+            }
+            else if (parameters.Length == 2)
+            {
+                if (!duckParts[0].gameObject.activeSelf)
+                {
+                    yield return "sendtochaterror The duck must be present for a duck part to be clicked!";
+                    yield break;
+                }
+                int minutes = 0;
+                int seconds = 0;
+                string[] time = parameters[1].Split(':');
+                if (!int.TryParse(time[0], out minutes))
+                {
+                    yield return "sendtochaterror!f The specified minutes '" + time[0] + "' is invalid!";
+                    yield break;
+                }
+                if (minutes < 10 && !time[0].StartsWith("0"))
+                {
+                    yield return "sendtochaterror!f The specified minutes '" + time[0] + "' is invalid!";
+                    yield break;
+                }
+                if (minutes < 0)
+                {
+                    yield return "sendtochaterror!f The specified minutes '" + time[0] + "' is less than 0!";
+                    yield break;
+                }
+                if (!int.TryParse(time[1], out seconds))
+                {
+                    yield return "sendtochaterror!f The specified seconds '" + time[1] + "' is invalid!";
+                    yield break;
+                }
+                if (seconds < 10 && !time[1].StartsWith("0"))
+                {
+                    yield return "sendtochaterror!f The specified seconds '" + time[1] + "' is invalid!";
+                    yield break;
+                }
+                if (seconds < 0 || seconds > 59)
+                {
+                    yield return "sendtochaterror!f The specified seconds '" + time[1] + "' is out of range 00-59!";
+                    yield break;
+                }
+                seconds += minutes * 60;
+                if (ZenModeActive)
+                {
+                    if ((int)Bomb.GetTime() > seconds)
+                    {
+                        yield return "sendtochaterror The specified time has already passed!";
+                        yield break;
+                    }
+                    if ((seconds - (int)Bomb.GetTime()) > 15)
+                        yield return "waiting music";
+                }
+                else
+                {
+                    if ((int)Bomb.GetTime() < seconds)
+                    {
+                        yield return "sendtochaterror The specified time has already passed!";
+                        yield break;
+                    }
+                    if (((int)Bomb.GetTime() - seconds) > 15)
+                        yield return "waiting music";
+                }
+                while ((int)Bomb.GetTime() != seconds) { yield return "trycancel"; }
+                yield return "end waiting music";
+                duckParts[parts.IndexOf(parameters[0].ToLower())].OnInteract();
+            }
+            else if (parameters.Length == 1)
+            {
+                if (!duckParts[0].gameObject.activeSelf)
+                {
+                    yield return "sendtochaterror The duck must be present for a duck part to be clicked!";
+                    yield break;
+                }
+                duckParts[parts.IndexOf(parameters[0].ToLower())].OnInteract();
+            }
+            yield break;
+        }
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        if (curtainSelectable.enabled && !placeholder)
+        {
+            curtainSelectable.OnInteract();
+            yield return new WaitForSeconds(0.1f);
+        }
+        if (behindCurtain == 0)
+        {
+            while ((int)Bomb.GetTime() % 10 != nothingPress) { yield return true; }
+            curtainSelectable.OnInteract();
+        }
+        else if (behindCurtain == 1)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                if (btnText[i].text.Equals(waysToFuckPelicans[correctApproach]))
+                {
+                    btnSelectables[i].OnInteract();
+                    yield return new WaitForSeconds(0.1f);
+                    break;
+                }
+            }
+            while ((int)Bomb.GetTime() % 10 != nothingPress) { yield return true; }
+            curtainSelectable.OnInteract();
+        }
+        else if (behindCurtain > 1)
+        {
+            if (!itemSelected)
+            {
+                if (correctItemRule == 1)
+                {
+                    int index = -1;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (shownItems[i] == 3)
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+                    itemSelectables[index].OnInteract();
+                    yield return new WaitForSeconds(0.1f);
+                }
+                else if (correctItemRule == 2)
+                {
+                    List<int> indexes = new List<int>();
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (shownItems[i] == 1 || shownItems[i] == 4 || shownItems[i] == 5)
+                        {
+                            indexes.Add(i);
+                        }
+                    }
+                    itemSelectables[indexes[Random.Range(0, indexes.Count)]].OnInteract();
+                    yield return new WaitForSeconds(0.1f);
+                }
+                else if (correctItemRule == 3)
+                {
+                    int index = -1;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (shownItems[i] == 4)
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+                    itemSelectables[index].OnInteract();
+                    yield return new WaitForSeconds(0.1f);
+                }
+                else if (correctItemRule == 4)
+                {
+                    List<int> indexes = new List<int>();
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (shownItems[i] == 3 || shownItems[i] == 6)
+                        {
+                            indexes.Add(i);
+                        }
+                    }
+                    itemSelectables[indexes[Random.Range(0, indexes.Count)]].OnInteract();
+                    yield return new WaitForSeconds(0.1f);
+                }
+                else if (correctItemRule == 5)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (btnText[i].text.Equals(possibleApproaches[correctApproach]))
+                        {
+                            btnSelectables[i].OnInteract();
+                            if (!solved)
+                                yield return new WaitForSeconds(0.1f);
+                            else
+                                yield break;
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < 4; i++)
+            {
+                if (btnText[i].text.Equals(possibleApproaches[correctApproach]))
+                {
+                    btnSelectables[i].OnInteract();
+                    break;
+                }
+            }
+            switch (correctApproach)
+            {
+                case 0:
+                    switch (iDidntPlanThisThroughSoICantNameThisVariableItemSelectedSadface)
+                    {
+                        case 0:
+                            duckPartSequence = new int[3] { 5, 6, 3 };
+                            break;
+                        case 4:
+                            duckPartSequence = new int[1] { 4 };
+                            break;
+                        default:
+                            duckPartSequence = new int[3] { 3, 5, 2 };
+                            break;
+                    }
+                    break;
+                case 1:
+                    switch (iDidntPlanThisThroughSoICantNameThisVariableItemSelectedSadface)
+                    {
+                        case 0:
+                            duckPartSequence = new int[3] { 4, 3, 1 };
+                            break;
+                        default:
+                            duckPartSequence = new int[3] { 0, 5, 6 };
+                            break;
+                    }
+                    break;
+                case 2:
+                    duckPartSequence = new int[6] { 1, 0, 2, 6, 5, 3 };
+                    break;
+                case 3:
+                    duckPartSequence = new int[1] { 2 };
+                    break;
+                case 4:
+                    switch (iDidntPlanThisThroughSoICantNameThisVariableItemSelectedSadface)
+                    {
+                        case 0:
+                            duckPartSequence = new int[4] { 3, 2, 1, 5 };
+                            break;
+                        default:
+                            duckPartSequence = new int[1] { 0 };
+                            break;
+                    }
+                    break;
+                default:
+                    duckPartSequence = new int[1] { 1 };
+                    break;
+            }
+            while (!solved)
+            {
+                if (correctApproach == 0 && iDidntPlanThisThroughSoICantNameThisVariableItemSelectedSadface == 0 && duckPartIndex == 1)
+                {
+                    while (!Bomb.GetFormattedTime().Contains('5')) { yield return true; }
+                }
+                else if (correctApproach == 0 && iDidntPlanThisThroughSoICantNameThisVariableItemSelectedSadface == 4)
+                {
+                    while ((int)Bomb.GetTime() % 10 + ((int)(Bomb.GetTime() % 60 / 10)) != 7) { yield return true; }
+                }
+                else if (correctApproach == 1 && iDidntPlanThisThroughSoICantNameThisVariableItemSelectedSadface == 3 && duckPartIndex == 1)
+                {
+                    while ((int)Bomb.GetTime() % 10 + ((int)(Bomb.GetTime() % 60 / 10)) != 6) { yield return true; }
+                }
+                else if (correctApproach == 2 && duckPartIndex == 0)
+                {
+                    while (Bomb.GetSolvedModuleNames().Count() % 2 == 1) { yield return true; }
+                }
+                duckParts[duckPartSequence[duckPartIndex]].OnInteract();
+                if (!solved)
+                    yield return new WaitForSeconds(0.1f);
             }
         }
     }
