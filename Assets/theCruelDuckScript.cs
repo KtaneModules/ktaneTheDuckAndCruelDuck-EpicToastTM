@@ -697,7 +697,7 @@ public class theCruelDuckScript : MonoBehaviour {
                 }
                 if (temp < 0 || temp > 9)
                 {
-                    yield return "sendtochaterror!f The specified digit '" + parameters[1] + "' is out of range 0-9!";
+                    yield return "sendtochaterror The specified digit '" + parameters[1] + "' is out of range 0-9!";
                     yield break;
                 }
                 while ((int)Bomb.GetTime() % 10 != temp) { yield return "trycancel"; }
@@ -767,6 +767,11 @@ public class theCruelDuckScript : MonoBehaviour {
                 int minutes = 0;
                 int seconds = 0;
                 string[] time = parameters[1].Split(':');
+                if (time.Length != 2)
+                {
+                    yield return "sendtochaterror Invalid time format! Expected '<minutes>:<seconds>'!";
+                    yield break;
+                }
                 if (!int.TryParse(time[0], out minutes))
                 {
                     yield return "sendtochaterror!f The specified minutes '" + time[0] + "' is invalid!";
@@ -774,12 +779,12 @@ public class theCruelDuckScript : MonoBehaviour {
                 }
                 if (minutes < 10 && !time[0].StartsWith("0"))
                 {
-                    yield return "sendtochaterror!f The specified minutes '" + time[0] + "' is invalid!";
+                    yield return "sendtochaterror The specified minutes '" + time[0] + "' is invalid!";
                     yield break;
                 }
                 if (minutes < 0)
                 {
-                    yield return "sendtochaterror!f The specified minutes '" + time[0] + "' is less than 0!";
+                    yield return "sendtochaterror The specified minutes '" + time[0] + "' is less than 0!";
                     yield break;
                 }
                 if (!int.TryParse(time[1], out seconds))
@@ -789,12 +794,12 @@ public class theCruelDuckScript : MonoBehaviour {
                 }
                 if (seconds < 10 && !time[1].StartsWith("0"))
                 {
-                    yield return "sendtochaterror!f The specified seconds '" + time[1] + "' is invalid!";
+                    yield return "sendtochaterror The specified seconds '" + time[1] + "' is invalid!";
                     yield break;
                 }
                 if (seconds < 0 || seconds > 59)
                 {
-                    yield return "sendtochaterror!f The specified seconds '" + time[1] + "' is out of range 00-59!";
+                    yield return "sendtochaterror The specified seconds '" + time[1] + "' is out of range 00-59!";
                     yield break;
                 }
                 seconds += minutes * 60;
